@@ -1,0 +1,28 @@
+{
+  "name": "philippgrashoff/notificationforatk",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "config":{
+    "platform":{
+      "php":"7.3"
+    }
+  },
+  "require":{
+    "atk4/data": "2.2.0",
+    "atk4/schema": "2.2.0",
+    "philippgrashoff/secondarymodelforatk": "dev-master"
+  },
+  "require-dev": {
+    "phpunit/phpunit": ">8"
+  },
+  "autoload":{
+    "psr-4":{
+      "notificationforatk\\":"src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "notificationforatk\\tests\\": "tests"
+    }
+  }
+}
