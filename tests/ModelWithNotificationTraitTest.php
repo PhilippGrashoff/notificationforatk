@@ -5,88 +5,172 @@ declare(strict_types=1);
 namespace notificationforatk\tests;
 
 use atk4\core\AtkPhpunit\TestCase;
+use atk4\data\Persistence;
+use atk4\data\Reference\HasMany;
+use atk4\schema\Migration;
+use notificationforatk\Notification;
+use notificationforatk\tests\TestClasses\ClassWithNotifications;
 
-class ModelWithNotificationTraitTest extends TestCase {
+class ModelWithNotificationTraitTest extends TestCase
+{
 
-    /*
-     *
-     */
-    public function testCheckNotificationForEmail() {
-        $g = new \EOO\Data\Group(self::$app->db);
-        $g->save();
-        $g->checkNotificationForEmail(3);
-        $this->assertTrue($this->_notificationFound($g, 'NO_EMAIL'));
-        $n = $g->getNotificationByType('NO_EMAIL');
-        $this->assertEquals($n->get('level'), 3);
-        $g->addEmail('test1@easyoutdooroffice.com');
-        $g->checkNotificationForEmail(3);
-        $this->assertFalse($this->_notificationFound($g, 'NO_EMAIL'));
+    public function testReferenceSetInInit()
+    {
+        $model = new ClassWithNotifications(new Persistence\Array_());
+        self::assertInstanceOf(
+            HasMany::class,
+            $model->getRef(Notification::class)
+        );
     }
 
-
-    /*
-     *
-     */
-    public function testCheckNotificationForPhone() {
-        $g = new \EOO\Data\Group(self::$app->db);
-        $g->save();
-        $g->checkNotificationForPhone(3);
-        $this->assertTrue($this->_notificationFound($g, 'NO_PHONE'));
-        $n = $g->getNotificationByType('NO_PHONE');
-        $this->assertEquals($n->get('level'), 3);
-        $g->addPhone('12345');
-        $g->checkNotificationForPhone(3);
-        $this->assertFalse($this->_notificationFound($g, 'NO_PHONE'));
+    public function testAfterSaveHook()
+    {
+        $model = new ClassWithNotifications(new Persistence\Array_());
+        $model->save();
+        self::assertCount(
+            1,
+            $model->ref(Notification::class)
+        );
     }
 
+    public function testAfterLoadHook()
+    {
+        $persistence = $this->_getSqliteWithMigrations();
+        $model1 = new ClassWithNotifications($persistence);
+        $model1->save();
+        $model2 = new ClassWithNotifications($persistence, ['notificationType' => 'SOME_OTHER_TYPE']);
+        $model2->save();
 
-    /*
-     *
-     */
-    public function testCheckNotificationForAddress() {
-        $g = new \EOO\Data\Group(self::$app->db);
-        $g->save();
-        $g->checkNotificationForAddress(3);
-        $this->assertTrue($this->_notificationFound($g, 'NO_ADDRESS'));
-        $n = $g->getNotificationByType('NO_ADDRESS');
-        $this->assertEquals($n->get('level'), 3);
-        $g->addAddress('test1@easyoutdooroffice.com');
-        $g->checkNotificationForAddress(3);
-        $this->assertFalse($this->_notificationFound($g, 'NO_ADDRESS'));
+        $i = 0;
+        foreach (new ClassWithNotifications($persistence) as $record) {
+            self::assertCount(
+                1,
+                $record->ref(Notification::class)
+            );
+            $i++;
+            if ($i === 1) {
+                self::assertEquals(
+                    'SOMETYPE',
+                    $record->ref(Notification::class)->loadAny()->get('value')
+                );
+            } else {
+                self::assertEquals(
+                    'SOME_OTHER_TYPE',
+                    $record->ref(Notification::class)->loadAny()->get('value')
+                );
+            }
+        }
+
+        self::assertSame(2, $i);
     }
 
-
-    /*
-     *
-     */
     public function testgetMaxNotificationLevel()
     {
-        $g = new \EOO\Data\Tour(self::$app->db);
-        $g->save();
-        $this->assertEquals(3, $g->getMaxNotificationLevel());
+        $persistence = $this->_getSqliteWithMigrations();
+        $model = new ClassWithNotifications($persistence);
+        $model->save();
+
+        self::assertEquals(1, $model->getMaxNotificationLevel());
+
+        $model->createLevel3Notification();
+        self::assertEquals(3, $model->getMaxNotificationLevel());
+        self::assertCount(2, $model->ref(Notification::class));
+
+        $model->deleteAllNotifications();
+        self::assertEquals(0, $model->getMaxNotificationLevel());
     }
 
-
-    /*
-     *
-     */
-    public function testgetNotificationArray()
+    public function testgetNotificationByType()
     {
-        $g = new \EOO\Data\Group(self::$app->db);
-        $g->save();
-        $this->assertTrue(is_array($g->exportNotificationArray()));
+        $persistence = $this->_getSqliteWithMigrations();
+        $model = new ClassWithNotifications($persistence);
+        $model->save();
+        $res = $model->getNotificationByType('SOMETYPE');
+        self::assertInstanceOf(Notification::class, $res);
+        self::assertNull($model->getNotificationByType('SOMENONEXISTANTTYPE'));
     }
 
-    /*
-     *
-     */
-    public function testgetNotificationByType() {
-        $g = new \EOO\Data\Group(self::$app->db);
-        $g->save();
-        $g->notificationsLoaded = false;
-        $res = $g->getNotificationByType('NO_NAME');
-        self::assertInstanceOf(\EOO\Data\Notification::class, $res);
-        $res = $g->getNotificationByType('FGGSFDFF');
-        self::assertNull($res);
+    public function testCreateNotificationUpdatesExisting() {
+        $persistence = $this->_getSqliteWithMigrations();
+        $model = new ClassWithNotifications($persistence);
+        $model->save();
+        $this->callProtected($model, 'createNotification', 'SOMETYPE', 'Blabla', [], 3);
+        self::assertCount(1, $model->ref(Notification::class));
+        self::assertEquals(3, $model->getMaxNotificationLevel());
+    }
+
+    public function testDeleteNotification() {
+        $persistence = $this->_getSqliteWithMigrations();
+        $model = new ClassWithNotifications($persistence);
+        $model->save();
+        $this->callProtected($model, 'deleteNotification', 'SOMETYPE');
+        self::assertCount(0, $model->ref(Notification::class));
+    }
+
+    public function testFieldsArrayAsAdditionalArg() {
+        $persistence = $this->_getSqliteWithMigrations();
+        $model = new ClassWithNotifications($persistence);
+        $model->save();
+        $this->callProtected($model, 'createNotification', 'SOMETYPE', 'bla', ['field1', 'field2']);
+        self::assertCount(2, $model->ref(Notification::class));
+        $this->callProtected($model, 'deleteNotification', 'SOMETYPE', ['field1', 'field2']);
+        self::assertCount(1, $model->ref(Notification::class));
+        $this->callProtected($model, 'deleteNotification', 'SOMETYPE', ['field1', 'field2']);
+        self::assertCount(1, $model->ref(Notification::class));
+        $this->callProtected($model, 'deleteNotification', 'SOMETYPE');
+        self::assertCount(0, $model->ref(Notification::class));
+    }
+
+    public function testLoadNotificationLoadsNotificationsFromDB() {
+        $persistence = $this->_getSqliteWithMigrations();
+        $model = new ClassWithNotifications($persistence);
+        $model->save();
+        $model2 = new ClassWithNotifications($persistence);
+        $model2->load($model->get($model->id_field));
+        $model2->loadNotifications();
+
+        self::assertCount(1, $model2->ref(Notification::class));
+    }
+
+    public function testCreateNotificationForField() {
+        $persistence = $this->_getSqliteWithMigrations();
+        $model = new ClassWithNotifications($persistence);
+        $model->save();
+        $model->deleteAllNotifications();
+        self::assertCount(0, $model->ref(Notification::class));
+        $this->callProtected($model, 'createNotificationIfFieldEmpty', 'name');
+        self::assertCount(1, $model->ref(Notification::class));
+        $notification = $model->ref(Notification::class)->loadAny();
+        self::assertEquals(
+            ['name'],
+            $notification->get('field')
+        );
+
+        $this->callProtected($model, 'deleteNotificationForField', 'name');
+        self::assertCount(0, $model->ref(Notification::class));
+    }
+
+    public function testCreateNotificationForFieldDeletesIfFieldNotEmpty() {
+        $persistence = $this->_getSqliteWithMigrations();
+        $model = new ClassWithNotifications($persistence);
+        $model->save();
+        $model->deleteAllNotifications();
+        self::assertCount(0, $model->ref(Notification::class));
+        $this->callProtected($model, 'createNotificationIfFieldEmpty', 'name');
+        self::assertCount(1, $model->ref(Notification::class));
+        $model->set('name', 'somevalue');
+        $this->callProtected($model, 'createNotificationIfFieldEmpty', 'name');
+        self::assertCount(0, $model->ref(Notification::class));
+    }
+
+    protected function _getSqliteWithMigrations(): Persistence
+    {
+        $persistence = Persistence::connect('sqlite::memory:');
+        $model1 = new ClassWithNotifications($persistence);
+        Migration::of($model1)->drop()->create();
+        $notification = new Notification($persistence);
+        Migration::of($notification)->drop()->create();
+
+        return $persistence;
     }
 }
