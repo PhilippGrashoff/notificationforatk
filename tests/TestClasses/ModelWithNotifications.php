@@ -8,7 +8,7 @@ use atk4\data\Model;
 use notificationforatk\ModelWithNotificationTrait;
 use notificationforatk\Notification;
 
-class ClassWithNotifications extends Model {
+class ModelWithNotifications extends Model {
 
     use ModelWithNotificationTrait;
 

@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace notificationforatk;
 
+use atk4\core\AppScopeTrait;
 use atk4\data\Model;
 use atk4\data\Reference;
+use traitsforatkdata\ModelWithAppTrait;
 
 
 trait ModelWithNotificationTrait
 {
+
+    use ModelWithAppTrait;
 
     protected $notifications = [];
     protected $notificationsLoaded = false;
@@ -20,8 +24,11 @@ trait ModelWithNotificationTrait
         $ref = $this->hasMany(
             Notification::class,
             [
-                function() {
-                    return (new Notification($this->persistence, ['parentObject' => $this]))->addCondition('model_class', get_class($this));
+                function () {
+                    return (new Notification($this->persistence, ['parentObject' => $this]))->addCondition(
+                        'model_class',
+                        get_class($this)
+                    );
                 },
                 'their_field' => 'model_id'
             ]
@@ -29,14 +36,14 @@ trait ModelWithNotificationTrait
 
         $this->onHook(
             Model::HOOK_AFTER_SAVE,
-            function (Model $model, $isUpdate) {
+            function (self $model, $isUpdate) {
                 $model->checkNotifications();
             }
         );
 
         $this->onHook(
             Model::HOOK_AFTER_LOAD,
-            function (Model $model) {
+            function (self $model) {
                 $model->resetLoadedNotifications();
             }
         );
@@ -44,9 +51,18 @@ trait ModelWithNotificationTrait
         return $ref;
     }
 
-    final public function checkNotifications() {
-        $this->_checkNotifications();
+    final public function checkNotifications()
+    {
+        if($this->_checkSkipNotifications()) {
+            $this->_checkNotifications();
+        }
     }
+
+    /**
+     * implement in child classes
+     * @codeCoverageIgnore 
+     */
+    protected function _checkNotifications(): void{}
 
     /**
      * checks if the very same notification already exists
@@ -159,7 +175,10 @@ trait ModelWithNotificationTrait
 
     public function loadNotifications(): void
     {
-        if ($this->notificationsLoaded) {
+        if (
+            $this->notificationsLoaded
+            || !$this->_checkSkipNotifications()
+        ) {
             return;
         }
 
@@ -171,8 +190,23 @@ trait ModelWithNotificationTrait
         $this->notificationsLoaded = true;
     }
 
-    public function resetLoadedNotifications() {
+    public function resetLoadedNotifications()
+    {
         $this->notificationsLoaded = false;
         $this->notifications = [];
+    }
+
+
+    protected function _checkSkipNotifications(): bool
+    {
+        //add possibility to skip auditing App-wide, e.g. to speed up tests
+        if (
+            isset($this->app->createNotifications)
+            && !$this->app->createNotifications
+        ) {
+            return false;
+        }
+
+        return true;
     }
 }
