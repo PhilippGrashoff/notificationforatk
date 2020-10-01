@@ -14,7 +14,7 @@ class Notification extends SecondaryModel
     public $reload_after_save = false;
 
 
-    public function init(): void
+    protected function init(): void
     {
 
         parent::init();
@@ -47,6 +47,6 @@ class Notification extends SecondaryModel
             ]
         );
 
-        $this->setOrder(['deactivated', 'level desc']);
+        $this->setOrder(['deactivated' => 'asc', 'level' => 'desc']);
     }
 }

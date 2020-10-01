@@ -22,7 +22,7 @@ class ModelWithNotificationTraitTest extends TestCase
 
     public function testReferenceSetInInit()
     {
-        $model = new ModelWithNotifications(new Persistence\Array_());
+        $model = new ModelWithNotifications($this->getSqliteTestPersistence());
         self::assertInstanceOf(
             HasMany::class,
             $model->getRef(Notification::class)
@@ -31,7 +31,7 @@ class ModelWithNotificationTraitTest extends TestCase
 
     public function testAfterSaveHook()
     {
-        $model = new ModelWithNotifications(new Persistence\Array_());
+        $model = new ModelWithNotifications($this->getSqliteTestPersistence());
         $model->save();
         self::assertCount(
             1,

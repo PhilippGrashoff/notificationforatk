@@ -60,7 +60,7 @@ trait ModelWithNotificationTrait
 
     /**
      * implement in child classes
-     * @codeCoverageIgnore 
+     * @codeCoverageIgnore
      */
     protected function _checkNotifications(): void{}
 

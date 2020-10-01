@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace notificationforatk\tests;
 
-use atk4\core\AtkPhpunit\TestCase;
-use atk4\data\Persistence;
+use traitsforatkdata\TestCase;
 use notificationforatk\Notification;
 
 
 class NotificationTest extends TestCase {
 
+    protected $sqlitePersistenceModels = [
+        Notification::class
+    ];
+
+
     public function testInit() {
-        $notification = new Notification(new Persistence\Array_());
+        $notification = new Notification($this->getSqliteTestPersistence());
         self::assertTrue($notification->hasField('message'));
     }
 }
