@@ -209,4 +209,20 @@ trait ModelWithNotificationTrait
 
         return true;
     }
+
+    public function addMaxNotificationLevelExpression()
+    {
+        $this->addExpression(
+            'max_notification_level',
+            [
+                $this->refLink(Notification::class)
+                    ->addCondition('deactivated', '!=', 1)
+                    ->action('fx0', ['max', 'level']),
+                'type' => 'integer',
+                'default' => 0
+            ]
+        );
+
+        return $this;
+    }
 }

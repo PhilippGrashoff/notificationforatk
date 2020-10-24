@@ -41,7 +41,7 @@ class ModelWithNotificationTraitTest extends TestCase
 
     public function testAfterLoadHook()
     {
-        $persistence = $this->_getSqliteWithMigrations();
+        $persistence = $this->getSqliteTestPersistence();
         $model1 = new ModelWithNotifications($persistence);
         $model1->save();
         $model2 = new ModelWithNotifications($persistence, ['notificationType' => 'SOME_OTHER_TYPE']);
@@ -72,7 +72,7 @@ class ModelWithNotificationTraitTest extends TestCase
 
     public function testgetMaxNotificationLevel()
     {
-        $persistence = $this->_getSqliteWithMigrations();
+        $persistence = $this->getSqliteTestPersistence();
         $model = new ModelWithNotifications($persistence);
         $model->save();
 
@@ -88,7 +88,7 @@ class ModelWithNotificationTraitTest extends TestCase
 
     public function testgetNotificationByType()
     {
-        $persistence = $this->_getSqliteWithMigrations();
+        $persistence = $this->getSqliteTestPersistence();
         $model = new ModelWithNotifications($persistence);
         $model->save();
         $res = $model->getNotificationByType('SOMETYPE');
@@ -97,7 +97,7 @@ class ModelWithNotificationTraitTest extends TestCase
     }
 
     public function testCreateNotificationUpdatesExisting() {
-        $persistence = $this->_getSqliteWithMigrations();
+        $persistence = $this->getSqliteTestPersistence();
         $model = new ModelWithNotifications($persistence);
         $model->save();
         $this->callProtected($model, 'createNotification', 'SOMETYPE', 'Blabla', [], 3);
@@ -106,7 +106,7 @@ class ModelWithNotificationTraitTest extends TestCase
     }
 
     public function testDeleteNotification() {
-        $persistence = $this->_getSqliteWithMigrations();
+        $persistence = $this->getSqliteTestPersistence();
         $model = new ModelWithNotifications($persistence);
         $model->save();
         $this->callProtected($model, 'deleteNotification', 'SOMETYPE');
@@ -114,7 +114,7 @@ class ModelWithNotificationTraitTest extends TestCase
     }
 
     public function testFieldsArrayAsAdditionalArg() {
-        $persistence = $this->_getSqliteWithMigrations();
+        $persistence = $this->getSqliteTestPersistence();
         $model = new ModelWithNotifications($persistence);
         $model->save();
         $this->callProtected($model, 'createNotification', 'SOMETYPE', 'bla', ['field1', 'field2']);
@@ -128,7 +128,7 @@ class ModelWithNotificationTraitTest extends TestCase
     }
 
     public function testLoadNotificationLoadsNotificationsFromDB() {
-        $persistence = $this->_getSqliteWithMigrations();
+        $persistence = $this->getSqliteTestPersistence();
         $model = new ModelWithNotifications($persistence);
         $model->save();
         $model2 = new ModelWithNotifications($persistence);
@@ -139,7 +139,7 @@ class ModelWithNotificationTraitTest extends TestCase
     }
 
     public function testCreateNotificationForField() {
-        $persistence = $this->_getSqliteWithMigrations();
+        $persistence = $this->getSqliteTestPersistence();
         $model = new ModelWithNotifications($persistence);
         $model->save();
         $model->deleteAllNotifications();
@@ -157,7 +157,7 @@ class ModelWithNotificationTraitTest extends TestCase
     }
 
     public function testCreateNotificationForFieldDeletesIfFieldNotEmpty() {
-        $persistence = $this->_getSqliteWithMigrations();
+        $persistence = $this->getSqliteTestPersistence();
         $model = new ModelWithNotifications($persistence);
         $model->save();
         $model->deleteAllNotifications();
@@ -191,15 +191,44 @@ class ModelWithNotificationTraitTest extends TestCase
         );
     }
 
+    public function testAddMaxNotificationLevelExpression() {
+        $persistence = $this->getSqliteTestPersistence();
+        $model = new ModelWithNotifications($persistence);
+        $model->addMaxNotificationLevelExpression();
+        $model->save();
+        self::assertTrue($model->hasField('max_notification_level'));
+        self::assertSame(
+            0,
+            $model->get('max_notification_level')
+        );
 
-    protected function _getSqliteWithMigrations(): Persistence
-    {
-        $persistence = Persistence::connect('sqlite::memory:');
-        $model1 = new ModelWithNotifications($persistence);
-        Migration::of($model1)->drop()->create();
-        $notification = new Notification($persistence);
-        Migration::of($notification)->drop()->create();
+        $model->createLevel1Notification();
+        $model->reload();
+        self::assertSame(
+            1,
+            $model->get('max_notification_level')
+        );
 
-        return $persistence;
+        $model->createLevel2Notification();
+        $model->reload();
+        self::assertSame(
+            2,
+            $model->get('max_notification_level')
+        );
+
+        $level3 = $model->createLevel3Notification();
+        $model->reload();
+        self::assertSame(
+            3,
+            $model->get('max_notification_level')
+        );
+
+        $level3->set('deactivated', 1);
+        $level3->save();
+        $model->reload();
+        self::assertSame(
+            2,
+            $model->get('max_notification_level')
+        );
     }
 }

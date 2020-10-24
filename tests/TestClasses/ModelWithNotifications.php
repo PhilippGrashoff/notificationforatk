@@ -30,7 +30,15 @@ class ModelWithNotifications extends Model {
     }
 
     public function createLevel3Notification() {
-        $this->createNotification('LEVEL3', 'BLABLA', [], 3);
+        return $this->createNotification('LEVEL3', 'BLABLA', [], 3);
+    }
+
+    public function createLevel2Notification() {
+        return $this->createNotification('LEVEL2', 'BLABLA', [], 2);
+    }
+
+    public function createLevel1Notification() {
+        return $this->createNotification('LEVEL1', 'BLABLA', [], 1);
     }
 
     public function deleteAllNotifications() {
