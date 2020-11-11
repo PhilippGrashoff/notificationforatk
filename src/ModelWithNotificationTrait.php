@@ -201,8 +201,8 @@ trait ModelWithNotificationTrait
     {
         //add possibility to skip auditing App-wide, e.g. to speed up tests
         if (
-            isset($this->app->createNotifications)
-            && !$this->app->createNotifications
+            isset($this->persistence->app->createNotifications)
+            && !$this->persistence->app->createNotifications
         ) {
             return false;
         }
