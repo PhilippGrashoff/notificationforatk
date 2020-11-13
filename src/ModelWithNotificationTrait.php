@@ -88,9 +88,9 @@ trait ModelWithNotificationTrait
                 if ($notification->get('level') !== $level) {
                     $notification->set('level', $level);
                     $notification->save();
-
-                    return $notification;
                 }
+                
+                return $notification;
             }
         }
 

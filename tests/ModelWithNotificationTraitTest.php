@@ -231,4 +231,21 @@ class ModelWithNotificationTraitTest extends TestCase
             $model->get('max_notification_level')
         );
     }
+
+    public function testCreateNotificationDoesNotCreateSameNotificationMoreThanOnce() {
+        $persistence = $this->getSqliteTestPersistence();
+        $model = new ModelWithNotifications($persistence);
+        $model->save();
+        self::assertEquals(
+            1,
+            $model->ref(Notification::class)->action('count')->getOne()
+        );
+
+        $model->set('name', 'somename');
+        $model->save();
+        self::assertEquals(
+            1,
+            $model->ref(Notification::class)->action('count')->getOne()
+        );
+    }
 }
