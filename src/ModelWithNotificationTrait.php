@@ -78,7 +78,7 @@ trait ModelWithNotificationTrait
         $this->loadNotifications();
 
         //check if notification already exists
-        foreach ($this->notifications as $notification) {
+        foreach ($this->notifications as $key => $notification) {
             //notification found
             if (
                 $notification->get('value') === $type
@@ -88,8 +88,10 @@ trait ModelWithNotificationTrait
                 if ($notification->get('level') !== $level) {
                     $notification->set('level', $level);
                     $notification->save();
+
+                    $this->notifications[$key] = clone $notification;
                 }
-                
+
                 return $notification;
             }
         }
@@ -102,7 +104,7 @@ trait ModelWithNotificationTrait
         $newNotification->set('field', $fields);
         $newNotification->set('extra_data', $extra_data);
         $newNotification->save();
-        $this->notifications[$newNotification->get('id')] = $newNotification;
+        $this->notifications[$newNotification->get('id')] = clone $newNotification;
 
         return $newNotification;
     }
