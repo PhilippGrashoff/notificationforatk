@@ -41,6 +41,13 @@ class ModelWithNotifications extends Model {
         return $this->createNotification('LEVEL1', 'BLABLA', [], 1);
     }
 
+    public function createLevelNotificationWithTwoFields() {
+        return $this->createNotification('SOMEOTHER', 'BLABLA', ['field1', 'field2'], 1);
+    }
+    public function createLevelNotificationWithOneField(string $fieldName) {
+        return $this->createNotification('SOMEOTHERNOTI', 'BLABLA', [$fieldName], 2);
+    }
+
     public function deleteAllNotifications() {
         foreach($this->ref(Notification::class) as $notification) {
             $notification->delete();

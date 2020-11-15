@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace notificationforatk\tests;
 
-use traitsforatkdata\TestCase;
-use atk4\data\Persistence;
 use atk4\data\Reference\HasMany;
-use atk4\schema\Migration;
 use notificationforatk\Notification;
 use notificationforatk\tests\TestClasses\AppWithNofiticationSetting;
 use notificationforatk\tests\TestClasses\ModelWithNotifications;
+use traitsforatkdata\TestCase;
 
 class ModelWithNotificationTraitTest extends TestCase
 {
@@ -96,7 +94,8 @@ class ModelWithNotificationTraitTest extends TestCase
         self::assertNull($model->getNotificationByType('SOMENONEXISTANTTYPE'));
     }
 
-    public function testCreateNotificationUpdatesExisting() {
+    public function testCreateNotificationUpdatesExisting()
+    {
         $persistence = $this->getSqliteTestPersistence();
         $model = new ModelWithNotifications($persistence);
         $model->save();
@@ -105,7 +104,8 @@ class ModelWithNotificationTraitTest extends TestCase
         self::assertEquals(3, $model->getMaxNotificationLevel());
     }
 
-    public function testDeleteNotification() {
+    public function testDeleteNotification()
+    {
         $persistence = $this->getSqliteTestPersistence();
         $model = new ModelWithNotifications($persistence);
         $model->save();
@@ -113,7 +113,8 @@ class ModelWithNotificationTraitTest extends TestCase
         self::assertCount(0, $model->ref(Notification::class));
     }
 
-    public function testFieldsArrayAsAdditionalArg() {
+    public function testFieldsArrayAsAdditionalArg()
+    {
         $persistence = $this->getSqliteTestPersistence();
         $model = new ModelWithNotifications($persistence);
         $model->save();
@@ -127,7 +128,8 @@ class ModelWithNotificationTraitTest extends TestCase
         self::assertCount(0, $model->ref(Notification::class));
     }
 
-    public function testLoadNotificationLoadsNotificationsFromDB() {
+    public function testLoadNotificationLoadsNotificationsFromDB()
+    {
         $persistence = $this->getSqliteTestPersistence();
         $model = new ModelWithNotifications($persistence);
         $model->save();
@@ -138,7 +140,8 @@ class ModelWithNotificationTraitTest extends TestCase
         self::assertCount(1, $model2->ref(Notification::class));
     }
 
-    public function testCreateNotificationForField() {
+    public function testCreateNotificationForField()
+    {
         $persistence = $this->getSqliteTestPersistence();
         $model = new ModelWithNotifications($persistence);
         $model->save();
@@ -156,7 +159,8 @@ class ModelWithNotificationTraitTest extends TestCase
         self::assertCount(0, $model->ref(Notification::class));
     }
 
-    public function testCreateNotificationForFieldDeletesIfFieldNotEmpty() {
+    public function testCreateNotificationForFieldDeletesIfFieldNotEmpty()
+    {
         $persistence = $this->getSqliteTestPersistence();
         $model = new ModelWithNotifications($persistence);
         $model->save();
@@ -169,7 +173,8 @@ class ModelWithNotificationTraitTest extends TestCase
         self::assertCount(0, $model->ref(Notification::class));
     }
 
-    public function testSettingInAppDisablesNotifications() {
+    public function testSettingInAppDisablesNotifications()
+    {
         $persistence = $this->getSqliteTestPersistence();
         $persistence->app = new AppWithNofiticationSetting();
         $persistence->app->createNotifications = false;
@@ -191,7 +196,8 @@ class ModelWithNotificationTraitTest extends TestCase
         );
     }
 
-    public function testAddMaxNotificationLevelExpression() {
+    public function testAddMaxNotificationLevelExpression()
+    {
         $persistence = $this->getSqliteTestPersistence();
         $model = new ModelWithNotifications($persistence);
         $model->addMaxNotificationLevelExpression();
@@ -232,7 +238,8 @@ class ModelWithNotificationTraitTest extends TestCase
         );
     }
 
-    public function testCreateNotificationDoesNotCreateSameNotificationMoreThanOnce() {
+    public function testCreateNotificationDoesNotCreateSameNotificationMoreThanOnce()
+    {
         $persistence = $this->getSqliteTestPersistence();
         $model = new ModelWithNotifications($persistence);
         $model->save();
@@ -246,6 +253,33 @@ class ModelWithNotificationTraitTest extends TestCase
         self::assertEquals(
             1,
             $model->ref(Notification::class)->action('count')->getOne()
+        );
+    }
+
+    public function testExportNotificationArray()
+    {
+        $persistence = $this->getSqliteTestPersistence();
+        $model = new ModelWithNotifications($persistence);
+        $model->save();
+        $model->createLevelNotificationWithTwoFields();
+        $model->createLevelNotificationWithOneField('field3');
+        self::assertEquals(
+            [
+                'field1' => 1,
+                'field2' => 1,
+                'field3' => 2,
+            ],
+            $model->exportNotificationFieldLevels()
+        );
+
+        $model->createLevelNotificationWithOneField('field2');
+        self::assertEquals(
+            [
+                'field1' => 1,
+                'field2' => 2,
+                'field3' => 2,
+            ],
+            $model->exportNotificationFieldLevels()
         );
     }
 }

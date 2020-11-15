@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace notificationforatk;
 
-use atk4\core\AppScopeTrait;
 use atk4\data\Model;
 use atk4\data\Reference;
 use traitsforatkdata\ModelWithAppTrait;
@@ -53,7 +52,7 @@ trait ModelWithNotificationTrait
 
     final public function checkNotifications()
     {
-        if($this->_checkSkipNotifications()) {
+        if ($this->_checkSkipNotifications()) {
             $this->_checkNotifications();
         }
     }
@@ -62,7 +61,9 @@ trait ModelWithNotificationTrait
      * implement in child classes
      * @codeCoverageIgnore
      */
-    protected function _checkNotifications(): void{}
+    protected function _checkNotifications(): void
+    {
+    }
 
     /**
      * checks if the very same notification already exists
@@ -226,5 +227,27 @@ trait ModelWithNotificationTrait
         );
 
         return $this;
+    }
+
+    /**
+     * returns an array containing all active notifications of the model.
+     * Format: $return[] = ['id' => $notification fieldname, 'level' => notification level]
+     */
+    public function exportNotificationFieldLevels(): array
+    {
+        $return = [];
+        $this->loadNotifications();
+        foreach ($this->notifications as $notification) {
+            foreach ($notification->get('field') as $fieldName) {
+                if (!array_key_exists($fieldName, $return)) {
+                    $return[$fieldName] = $notification->get('level');
+                }
+                elseif($notification->get('level') > $return[$fieldName]) {
+                    $return[$fieldName] = $notification->get('level');
+                }
+            }
+        }
+
+        return $return;
     }
 }
