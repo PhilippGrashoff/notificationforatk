@@ -250,4 +250,10 @@ trait ModelWithNotificationTrait
 
         return $return;
     }
+
+    public function getNotifications(): array {
+        $this->loadNotifications();
+
+        return $this->notifications;
+    }
 }

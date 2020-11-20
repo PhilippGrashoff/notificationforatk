@@ -282,4 +282,21 @@ class ModelWithNotificationTraitTest extends TestCase
             $model->exportNotificationFieldLevels()
         );
     }
+
+    public function testGetNotifications() {
+        $persistence = $this->getSqliteTestPersistence();
+        $model = new ModelWithNotifications($persistence);
+        $model->save();self::assertCount(
+            1,
+            $model->getNotifications()
+        );
+        $model->createLevel1Notification();
+        $model->createLevel2Notification();
+        $model->createLevel3Notification();
+        $model->reload();
+        self::assertCount(
+            4,
+            $model->getNotifications()
+        );
+    }
 }
