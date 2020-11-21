@@ -41,7 +41,7 @@ class Notification extends SecondaryModel
                 ],
                 [
                     'deactivated',
-                    'type' => 'boolean',
+                    'type' => 'integer',
                     'default' => 0
                 ],
             ]

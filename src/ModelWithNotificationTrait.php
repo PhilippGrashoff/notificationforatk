@@ -239,6 +239,9 @@ trait ModelWithNotificationTrait
         $return = [];
         $this->loadNotifications();
         foreach ($this->notifications as $notification) {
+            if($notification->get('deactivated') === 1) {
+                continue;
+            }
             foreach ($notification->get('field') as $fieldName) {
                 if (!array_key_exists($fieldName, $return)) {
                     $return[$fieldName] = $notification->get('level');

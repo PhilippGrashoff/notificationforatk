@@ -257,7 +257,7 @@ class ModelWithNotificationTraitTest extends TestCase
         );
     }
 
-    public function testExportNotificationArray()
+    public function testExportNotificationFieldLevels()
     {
         $persistence = $this->getSqliteTestPersistence();
         $model = new ModelWithNotifications($persistence);
@@ -280,6 +280,26 @@ class ModelWithNotificationTraitTest extends TestCase
                 'field2' => 2,
                 'field3' => 2,
             ],
+            $model->exportNotificationFieldLevels()
+        );
+    }
+
+    public function testExportNotificationFieldLevelsIgnoresDeactivated()
+    {
+        $persistence = $this->getSqliteTestPersistence();
+        $model = new ModelWithNotifications($persistence);
+        $model->save();
+        $notification = $model->createLevelNotificationWithOneField('field3');
+        self::assertSame(
+            ['field3' => 2],
+            $model->exportNotificationFieldLevels()
+        );
+
+        $notification->set('deactivated', 1);
+        $notification->save();
+        $model->resetLoadedNotifications();
+        self::assertSame(
+            [],
             $model->exportNotificationFieldLevels()
         );
     }
