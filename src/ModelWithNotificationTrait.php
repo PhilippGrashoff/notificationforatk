@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace notificationforatk;
 
+use atk4\data\Exception;
 use atk4\data\Model;
 use atk4\data\Reference;
 use traitsforatkdata\ModelWithAppTrait;
@@ -241,8 +242,7 @@ trait ModelWithNotificationTrait
             foreach ($notification->get('field') as $fieldName) {
                 if (!array_key_exists($fieldName, $return)) {
                     $return[$fieldName] = $notification->get('level');
-                }
-                elseif($notification->get('level') > $return[$fieldName]) {
+                } elseif ($notification->get('level') > $return[$fieldName]) {
                     $return[$fieldName] = $notification->get('level');
                 }
             }
@@ -251,9 +251,19 @@ trait ModelWithNotificationTrait
         return $return;
     }
 
-    public function getNotifications(): array {
+    public function getNotifications(): array
+    {
         $this->loadNotifications();
 
         return $this->notifications;
+    }
+
+    public function getNotificationById($id): Notification
+    {
+        $this->loadNotifications();
+        if(!array_key_exists($id, $this->notifications)) {
+            throw new Exception('The Notification with the ID ' . $id . 'was not found');
+        }
+        return $this->notifications[$id];
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace notificationforatk\tests;
 
+use atk4\data\Exception;
 use atk4\data\Reference\HasMany;
 use notificationforatk\Notification;
 use notificationforatk\tests\TestClasses\AppWithNofiticationSetting;
@@ -283,10 +284,12 @@ class ModelWithNotificationTraitTest extends TestCase
         );
     }
 
-    public function testGetNotifications() {
+    public function testGetNotifications()
+    {
         $persistence = $this->getSqliteTestPersistence();
         $model = new ModelWithNotifications($persistence);
-        $model->save();self::assertCount(
+        $model->save();
+        self::assertCount(
             1,
             $model->getNotifications()
         );
@@ -298,5 +301,28 @@ class ModelWithNotificationTraitTest extends TestCase
             4,
             $model->getNotifications()
         );
+    }
+
+
+    public function testGetNotificationById()
+    {
+        $persistence = $this->getSqliteTestPersistence();
+        $model = new ModelWithNotifications($persistence);
+        $model->save();
+        $notification = $model->ref(Notification::class)->loadAny();
+        $loadedNotification = $model->getNotificationById($notification->get('id'));
+        self::assertEquals(
+            $notification->get(),
+            $loadedNotification->get()
+        );
+    }
+
+    public function testGetNotificationByIdExceptionNotFound()
+    {
+        $persistence = $this->getSqliteTestPersistence();
+        $model = new ModelWithNotifications($persistence);
+        $model->save();
+        self::expectException(Exception::class);
+        $model->getNotificationById('someNonExistantId');
     }
 }
