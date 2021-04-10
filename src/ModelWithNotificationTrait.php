@@ -172,7 +172,7 @@ trait ModelWithNotificationTrait
         }
     }
 
-    protected function deleteNotificationForField(string $field)
+    protected function deleteNotificationForField(string $field): void
     {
         $this->deleteNotification('NO_' . strtoupper($field));
     }
@@ -214,7 +214,7 @@ trait ModelWithNotificationTrait
         return true;
     }
 
-    public function addMaxNotificationLevelExpression()
+    public function addMaxNotificationLevelExpression(): Model //TODO: Replace with static when moving to PHP8
     {
         $this->addExpression(
             'max_notification_level',
