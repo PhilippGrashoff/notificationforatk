@@ -214,7 +214,7 @@ trait ModelWithNotificationTrait
         return true;
     }
 
-    public function addMaxNotificationLevelExpression(): Model //TODO: Replace with static when moving to PHP8
+    public function addMaxNotificationLevelExpression(): self
     {
         $this->addExpression(
             'max_notification_level',
