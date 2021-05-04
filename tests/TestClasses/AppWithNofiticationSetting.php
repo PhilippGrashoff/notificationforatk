@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace notificationforatk\tests\TestClasses;
 
-use atk4\ui\App;
+use Atk4\Ui\App;
 
 
 class AppWithNofiticationSetting extends App {

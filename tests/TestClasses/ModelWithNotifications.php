@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace notificationforatk\tests\TestClasses;
 
-use atk4\data\Model;
+use Atk4\Data\Model;
 use notificationforatk\ModelWithNotificationTrait;
 use notificationforatk\Notification;
 

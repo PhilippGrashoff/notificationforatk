@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace notificationforatk;
 
-use atk4\data\Exception;
-use atk4\data\Model;
-use atk4\data\Reference;
-use traitsforatkdata\ModelWithAppTrait;
+use Atk4\Data\Exception;
+use Atk4\Data\Model;
+use Atk4\Data\Reference;
 
 
 trait ModelWithNotificationTrait
 {
-
-    use ModelWithAppTrait;
 
     protected $notifications = [];
     protected $notificationsLoaded = false;
@@ -24,11 +21,9 @@ trait ModelWithNotificationTrait
         $ref = $this->hasMany(
             Notification::class,
             [
-                function () {
-                    return (new Notification($this->persistence, ['parentObject' => $this]))->addCondition(
-                        'model_class',
-                        get_class($this)
-                    );
+                'model' => function () {
+                    return (new Notification($this->persistence, ['parentObject' => $this]))
+                        ->addCondition('model_class', get_class($this));
                 },
                 'their_field' => 'model_id'
             ]
@@ -239,7 +234,7 @@ trait ModelWithNotificationTrait
         $return = [];
         $this->loadNotifications();
         foreach ($this->notifications as $notification) {
-            if($notification->get('deactivated') === 1) {
+            if ($notification->get('deactivated') === 1) {
                 continue;
             }
             foreach ($notification->get('field') as $fieldName) {
@@ -264,7 +259,7 @@ trait ModelWithNotificationTrait
     public function getNotificationById($id): Notification
     {
         $this->loadNotifications();
-        if(!array_key_exists($id, $this->notifications)) {
+        if (!array_key_exists($id, $this->notifications)) {
             throw new Exception('The Notification with the ID ' . $id . 'was not found');
         }
         return $this->notifications[$id];
