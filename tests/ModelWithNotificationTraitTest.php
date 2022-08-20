@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace notificationforatk\tests;
 
-use atk4\data\Exception;
-use atk4\data\Reference\HasMany;
+use Atk4\Data\Exception;
+use Atk4\Data\Reference\HasMany;
 use notificationforatk\Notification;
 use notificationforatk\tests\TestClasses\AppWithNofiticationSetting;
 use notificationforatk\tests\TestClasses\ModelWithNotifications;
