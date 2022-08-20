@@ -8,14 +8,16 @@ use traitsforatkdata\TestCase;
 use notificationforatk\Notification;
 
 
-class NotificationTest extends TestCase {
+class NotificationTest extends TestCase
+{
 
     protected $sqlitePersistenceModels = [
         Notification::class
     ];
 
 
-    public function testInit() {
+    public function testInit()
+    {
         $notification = new Notification($this->getSqliteTestPersistence());
         self::assertTrue($notification->hasField('message'));
     }

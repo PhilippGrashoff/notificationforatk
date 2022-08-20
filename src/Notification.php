@@ -16,7 +16,6 @@ class Notification extends SecondaryModel
 
     protected function init(): void
     {
-
         parent::init();
 
         $this->addFields(

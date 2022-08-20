@@ -7,7 +7,8 @@ namespace notificationforatk\tests\TestClasses;
 use Atk4\Ui\App;
 
 
-class AppWithNofiticationSetting extends App {
+class AppWithNofiticationSetting extends App
+{
 
     public $createNotifications = true;
 
