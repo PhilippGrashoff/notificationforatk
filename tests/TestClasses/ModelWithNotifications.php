@@ -13,8 +13,8 @@ class ModelWithNotifications extends Model
 
     use ModelWithNotificationTrait;
 
-    public $notificationType = 'SOMETYPE';
-    public $notificationMessage = 'SomeMessage';
+    public string $notificationType = 'SOMETYPE';
+    public string $notificationMessage = 'SomeMessage';
 
     public $table = 'sometable';
 
@@ -33,27 +33,22 @@ class ModelWithNotifications extends Model
 
     public function createLevel3Notification()
     {
-        return $this->createNotification('LEVEL3', 'BLABLA', [], 3);
+        return $this->createNotification('LEVEL3', 'BLABLA', null, 3);
     }
 
     public function createLevel2Notification()
     {
-        return $this->createNotification('LEVEL2', 'BLABLA', [], 2);
+        return $this->createNotification('LEVEL2', 'BLABLA', null, 2);
     }
 
     public function createLevel1Notification()
     {
-        return $this->createNotification('LEVEL1', 'BLABLA', [], 1);
+        return $this->createNotification('LEVEL1', 'BLABLA', null, 1);
     }
 
-    public function createLevelNotificationWithTwoFields()
+    public function createLevelNotificationWithField(string $fieldName)
     {
-        return $this->createNotification('SOMEOTHER', 'BLABLA', ['field1', 'field2'], 1);
-    }
-
-    public function createLevelNotificationWithOneField(string $fieldName)
-    {
-        return $this->createNotification('SOMEOTHERNOTI', 'BLABLA', [$fieldName], 2);
+        return $this->createNotification('SOMEOTHERNOTI', 'BLABLA', $fieldName, 2);
     }
 
     public function deleteAllNotifications()

@@ -34,9 +34,10 @@ trait ModelWithNotificationTrait
             [
                 'model' => function () {
                     return (new Notification($this->getPersistence()))
-                        ->addCondition('model_class', get_class($this))
-                        ->addCondition('model_id', '[id]');
-                }
+                        ->addCondition('model_class', '=', get_class($this))
+                        ->addCondition('model_id', '=', $this->action('field', [$this->idField]));
+                },
+                'theirField' => 'model_id'
             ]
         );
 
@@ -102,7 +103,7 @@ trait ModelWithNotificationTrait
      *
      * @param string $type
      * @param string $message
-     * @param string $field
+     * @param string|null $field
      * @param int $level
      * @param array<string, mixed> $extra_data
      * @return Notification
@@ -112,10 +113,11 @@ trait ModelWithNotificationTrait
     protected function createNotification(
         string $type,
         string $message,
-        string $field,
+        ?string $field = null,
         int $level = 1,
         array $extra_data = []
     ): Notification {
+
         $this->loadNotifications();
 
         //check if notification already exists
@@ -138,7 +140,7 @@ trait ModelWithNotificationTrait
         }
 
         //create notification if it does not exist already
-        $newNotification = new Notification($this->getPersistence());
+        $newNotification = (new Notification($this->getPersistence()))->createEntity();
         $newNotification->setParentEntity($this);
         $newNotification->set('value', $type);
         $newNotification->set('message', $message);
@@ -159,7 +161,7 @@ trait ModelWithNotificationTrait
      * @return void
      * @throws Exception
      */
-    protected function deleteNotification(string $type, string $field): void
+    protected function deleteNotification(string $type, ?string $field = null): void
     {
         $this->loadNotifications();
 
@@ -327,7 +329,10 @@ trait ModelWithNotificationTrait
         $return = [];
         $this->loadNotifications();
         foreach ($this->notifications as $notification) {
-            if ($notification->get('deactivated') === true) {
+            if (
+                $notification->get('deactivated') === true
+                || !$notification->get('field')
+            ) {
                 continue;
             }
             $return[$notification->get('field')] = $notification->get('level');

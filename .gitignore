@@ -1,4 +1,5 @@
 vendor
+coverage
 .idea
 .phpunit.result.cache
 build
