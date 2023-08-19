@@ -330,7 +330,7 @@ class ModelWithNotificationTraitTest extends TestCase
         $model = new ModelWithNotifications($persistence);
         $model->save();
         $notification = $model->ref(Notification::class)->loadAny();
-        $loadedNotification = $model->getNotificationById($notification->get('id'));
+        $loadedNotification = $model->getNotificationById($notification->getId());
         self::assertEquals(
             $notification->get(),
             $loadedNotification->get()
