@@ -157,7 +157,7 @@ trait ModelWithNotificationTrait
      * deletes a notification based on its identifier and the field it applies to.
      *
      * @param string $type
-     * @param string $field
+     * @param string|null $field
      * @return void
      * @throws Exception
      */
@@ -180,6 +180,7 @@ trait ModelWithNotificationTrait
      * returns the maximum level of all notifications which are active
      *
      * @return int
+     * @throws Exception
      */
     public function getMaxNotificationLevel(): int
     {
@@ -203,6 +204,7 @@ trait ModelWithNotificationTrait
      *
      * @param string $type
      * @return Notification|null
+     * @throws Exception
      */
     public function getNotificationByType(string $type): ?Notification
     {
@@ -323,6 +325,7 @@ trait ModelWithNotificationTrait
      * Format:  [field name => notification level]
      *
      * @return array<string, int>
+     * @throws Exception
      */
     public function exportNotificationFieldLevels(): array
     {

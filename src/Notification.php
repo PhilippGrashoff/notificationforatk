@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhilippR\Atk4\Notification;
 
 use Atk4\Core\Exception;
-use secondarymodelforatk\SecondaryModel;
+use PhilippR\Atk4\SecondaryModel\SecondaryModel;
 
 class Notification extends SecondaryModel
 {
