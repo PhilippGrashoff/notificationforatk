@@ -3,7 +3,6 @@
   "description": "",
   "minimum-stability": "dev",
   "prefer-stable": true,
-
   "require": {
     "php": "8.*",
     "atk4/data": "4.*",
