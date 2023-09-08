@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace notificationforatk\tests;
+namespace PhilippR\Atk4\Notification\tests;
 
 use Atk4\Data\Reference\HasMany;
 use atkextendedtestcase\TestCase;
-use notificationforatk\Notification;
-use notificationforatk\tests\TestClasses\ModelWithNotifications;
+use PhilippR\Atk4\Notification\Notification;
+use PhilippR\Atk4\Notification\Tests\TestClasses\ModelWithNotifications;
 
 class ModelWithNotificationTraitTest extends TestCase
 {

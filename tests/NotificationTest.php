@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace notificationforatk\tests;
+namespace PhilippR\Atk4\Notification\tests;
 
 use atkextendedtestcase\TestCase;
-use notificationforatk\Notification;
+use PhilippR\Atk4\Notification\Notification;
 
 
 class NotificationTest extends TestCase

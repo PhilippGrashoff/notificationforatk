@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace notificationforatk\tests\TestClasses;
+namespace PhilippR\Atk4\Notification\Tests\TestClasses;
 
 use Atk4\Data\Model;
-use notificationforatk\ModelWithNotificationTrait;
-use notificationforatk\Notification;
+use PhilippR\Atk4\Notification\ModelWithNotificationTrait;
+use PhilippR\Atk4\Notification\Notification;
 
 class ModelWithNotifications extends Model
 {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace notificationforatk;
+namespace PhilippR\Atk4\Notification;
 
 use Atk4\Core\Exception;
 use secondarymodelforatk\SecondaryModel;

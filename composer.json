@@ -15,12 +15,12 @@
   },
   "autoload": {
     "psr-4": {
-      "notificationforatk\\": "src"
+      "PhilippR\\Atk4\\Notification\\": "src"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "notificationforatk\\tests\\": "tests"
+      "PhilippR\\Atk4\\Notification\\Tests\\": "tests"
     }
   }
 }
