@@ -58,12 +58,12 @@ class ModelWithNotificationTraitTest extends TestCase
             if ($i === 1) {
                 self::assertSame(
                     'SOMETYPE',
-                    $record->ref(Notification::class)->loadAny()->get('value')
+                    $record->ref(Notification::class)->loadAny()->get('type')
                 );
             } else {
                 self::assertSame(
                     'SOME_OTHER_TYPE',
-                    $record->ref(Notification::class)->loadAny()->get('value')
+                    $record->ref(Notification::class)->loadAny()->get('type')
                 );
             }
         }

@@ -117,14 +117,13 @@ trait ModelWithNotificationTrait
         int $level = 1,
         array $extra_data = []
     ): Notification {
-
         $this->loadNotifications();
 
         //check if notification already exists
         foreach ($this->notifications as $key => $notification) {
             //notification found
             if (
-                $notification->get('value') === $type
+                $notification->get('type') === $type
                 && $field === $notification->get('field')
             ) {
                 //update level if necessary
@@ -142,7 +141,7 @@ trait ModelWithNotificationTrait
         //create notification if it does not exist already
         $newNotification = (new Notification($this->getPersistence()))->createEntity();
         $newNotification->setParentEntity($this);
-        $newNotification->set('value', $type);
+        $newNotification->set('type', $type);
         $newNotification->set('message', $message);
         $newNotification->set('level', $level);
         $newNotification->set('field', $field);
@@ -167,7 +166,7 @@ trait ModelWithNotificationTrait
 
         foreach ($this->notifications as $key => $notification) {
             if (
-                $notification->get('value') === $type
+                $notification->get('type') === $type
                 && $field === $notification->get('field')
             ) {
                 $notification->delete();
@@ -211,7 +210,7 @@ trait ModelWithNotificationTrait
         $this->loadNotifications();
 
         foreach ($this->notifications as $notification) {
-            if ($notification->get('value') == $type) {
+            if ($notification->get('type') == $type) {
                 return clone $notification;
             }
         }

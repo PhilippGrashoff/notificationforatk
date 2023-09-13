@@ -22,9 +22,10 @@ class Notification extends SecondaryModel
     {
         parent::init();
 
+        //A proper identifier for the notification, e.g. "COUNTRY_MISSING"
+        $this->addField('type');
+
         //A message stating what the notification is about, e.g. "Please select a country for this user".
-        //A proper identifier for the notification, e.g. "COUNTRY_MISSING" is saved in the 'value' field which is
-        //inherited from SecondaryModel
         $this->addField(
             'message',
             ['type' => 'text']
