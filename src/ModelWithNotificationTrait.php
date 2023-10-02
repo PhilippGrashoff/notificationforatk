@@ -139,7 +139,7 @@ trait ModelWithNotificationTrait
         }
 
         //create notification if it does not exist already
-        $newNotification = (new Notification($this->getPersistence()))->createEntity();
+        $newNotification = (new Notification($this->getModel()->getPersistence()))->createEntity();
         $newNotification->setParentEntity($this);
         $newNotification->set('type', $type);
         $newNotification->set('message', $message);
