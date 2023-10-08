@@ -1,101 +1,57 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace PhilippR\Atk4\Notification;
 
 use Atk4\Data\Exception;
 use Atk4\Data\Model;
-use Atk4\Data\Reference;
+use Throwable;
 
-/**
- * @extends Model<Model>
- */
-trait ModelWithNotificationTrait
+class NotificationController
 {
+
+    protected Model $entity;
+
     /** @var array<int,Notification> $notifications */
     protected array $notifications = [];
 
     /**
-     * @var bool $notificationsLoaded Indicates if the notifications for this Entity were already loaded to
+     * @var bool $notificationsLoaded Indicates if the notifications for this entity were already loaded to
      * $notifications array
      */
     protected bool $notificationsLoaded = false;
 
-    /**
-     * Use this method to add a Notification reference to a Model using this trait
-     *
-     * @return Reference\HasMany
-     */
-    protected function addNotificationReferenceAndHooks(): Reference\HasMany
+    public function __construct(Model $entity)
     {
-        $ref = $this->hasMany(
-            Notification::class,
-            [
-                'model' => function () {
-                    return (new Notification($this->getPersistence()))
-                        ->addCondition('model_class', '=', get_class($this))
-                        ->addCondition('model_id', '=', $this->action('field', [$this->idField]));
-                },
-                'theirField' => 'model_id'
-            ]
-        );
-
-        //After saving the entity, re-check the notifications with new values
-        $this->onHook(
-            Model::HOOK_AFTER_SAVE,
-            function (self $entity) {
-                $entity->checkNotifications();
-            }
-        );
-
-        //Needed when iterating over a Model and doing something with the notifications of each entity
-        $this->onHook(
-            Model::HOOK_AFTER_LOAD,
-            function (self $model) {
-                $model->resetLoadedNotifications();
-            }
-        );
-
-        return $ref;
+        $this->entity = $entity;
     }
 
     /**
-     * this method checks if notifications should be calculated at all. If so, it triggers the re-check of all notifications
-     * @return void
+     * implement logic for Notification checks in child classes.
+     * In here, the logic of the notification calculation is stored. This means checking
+     * values, set references or some other logic you want to implement.
      */
-    final public function checkNotifications(): void
+    public function recheckNotifications(): void
     {
-        if ($this->_checkSkipNotifications()) {
-            $this->_checkNotifications();
+        if (!$this->skipNotificationCreation()) {
+            //TODO
         }
     }
 
     /**
-     * Can be used to disable notification creation app-wide, e.g. to speed up tests
+     * Can be used to disable notification creation, e.g. to speed up tests
      *
      * @return bool
      */
-    protected function _checkSkipNotifications(): bool
+    protected function skipNotificationCreation(): bool
     {
         if (
             isset($_ENV['createNotifications'])
             && $_ENV['createNotifications'] === false
         ) {
-            return false;
+            return true;
         }
 
-        return true;
-    }
-
-    /**
-     * implement in child classes. In here, the logic of the notification calculation is stored. This means checking
-     * values, set references or some other logic you want to implement.
-     *
-     * @return void
-     */
-    protected function _checkNotifications(): void
-    {
+        return false;
     }
 
     /**
@@ -108,7 +64,7 @@ trait ModelWithNotificationTrait
      * @param array<string, mixed> $extra_data
      * @return Notification
      * @throws Exception
-     * @throws \Atk4\Core\Exception
+     * @throws \Atk4\Core\Exception|Throwable
      */
     protected function createNotification(
         string $type,
@@ -139,8 +95,8 @@ trait ModelWithNotificationTrait
         }
 
         //create notification if it does not exist already
-        $newNotification = (new Notification($this->getModel()->getPersistence()))->createEntity();
-        $newNotification->setParentEntity($this);
+        $newNotification = (new Notification($this->entity->getModel()->getPersistence()))->createEntity();
+        $newNotification->setParentEntity($this->entity);
         $newNotification->set('type', $type);
         $newNotification->set('message', $message);
         $newNotification->set('level', $level);
@@ -159,6 +115,7 @@ trait ModelWithNotificationTrait
      * @param string|null $field
      * @return void
      * @throws Exception
+     * @throws Throwable
      */
     protected function deleteNotification(string $type, ?string $field = null): void
     {
@@ -180,6 +137,7 @@ trait ModelWithNotificationTrait
      *
      * @return int
      * @throws Exception
+     * @throws Throwable
      */
     public function getMaxNotificationLevel(): int
     {
@@ -204,6 +162,7 @@ trait ModelWithNotificationTrait
      * @param string $type
      * @return Notification|null
      * @throws Exception
+     * @throws Throwable
      */
     public function getNotificationByType(string $type): ?Notification
     {
@@ -226,16 +185,16 @@ trait ModelWithNotificationTrait
      * @param string $message
      * @return void
      * @throws Exception
-     * @throws \Atk4\Core\Exception
+     * @throws \Atk4\Core\Exception|Throwable
      */
     protected function createNotificationIfFieldEmpty(string $field, int $level = 2, string $message = ''): void
     {
         $this->loadNotifications();
 
-        if (empty($this->get($field))) {
+        if (empty($this->entity->get($field))) {
             $this->createNotification(
                 'NO_' . strtoupper($field),
-                $message ?: 'The field ' . $this->getField($field)->getCaption() . ' is empty.',
+                $message ?: 'The field ' . $this->entity->getField($field)->getCaption() . ' is empty.',
                 $field,
                 $level
             );
@@ -250,11 +209,11 @@ trait ModelWithNotificationTrait
      * @param string $field
      * @return void
      * @throws Exception
+     * @throws Throwable
      */
     protected function deleteNotificationForField(string $field): void
     {
         $this->loadNotifications();
-
         $this->deleteNotification('NO_' . strtoupper($field), $field);
     }
 
@@ -264,22 +223,22 @@ trait ModelWithNotificationTrait
      * are already loaded to the array. If not, it loads them from persistence.
      *
      * @return void
-     * @throws Exception
+     * @throws Exception|Throwable
      */
     public function loadNotifications(): void
     {
-        $this->assertIsLoaded();
+        $this->entity->assertIsLoaded();
 
         if (
             $this->notificationsLoaded
-            || !$this->_checkSkipNotifications()
+            || $this->skipNotificationCreation()
         ) {
             return;
         }
 
         $this->notifications = [];
 
-        foreach ($this->ref(Notification::class) as $notification) {
+        foreach ($this->entity->ref(Notification::class) as $notification) {
             $this->notifications[$notification->getId()] = clone $notification;
         }
         $this->notificationsLoaded = true;
@@ -305,7 +264,7 @@ trait ModelWithNotificationTrait
      */
     public function addMaxNotificationLevelExpression(): static
     {
-        $this->addExpression(
+        $this->entity->addExpression(
             'max_notification_level',
             [
                 'expr' => $this->refLink(Notification::class)
@@ -325,6 +284,7 @@ trait ModelWithNotificationTrait
      *
      * @return array<string, int>
      * @throws Exception
+     * @throws Throwable
      */
     public function exportNotificationFieldLevels(): array
     {
@@ -339,7 +299,6 @@ trait ModelWithNotificationTrait
             }
             $return[$notification->get('field')] = $notification->get('level');
         }
-
 
         return $return;
     }
