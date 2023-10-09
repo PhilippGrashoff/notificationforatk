@@ -33,7 +33,7 @@ class NotificationController
     public function recheckNotifications(): void
     {
         if (!$this->skipNotificationCreation()) {
-            //TODO
+            //TODO your code here
         }
     }
 
@@ -254,28 +254,6 @@ class NotificationController
     {
         $this->notificationsLoaded = false;
         $this->notifications = [];
-    }
-
-
-    /**
-     * Used to add an expression for the maximum notification level to the Model.
-     *
-     * @return Model
-     */
-    public function addMaxNotificationLevelExpression(): static
-    {
-        $this->entity->addExpression(
-            'max_notification_level',
-            [
-                'expr' => $this->refLink(Notification::class)
-                    ->addCondition('deactivated', '!=', true)
-                    ->action('fx0', ['max', 'level']),
-                'type' => 'integer',
-                'default' => 0
-            ]
-        );
-
-        return $this;
     }
 
     /**
