@@ -11,10 +11,18 @@ class DemoNotificationController extends NotificationController
     public string $notificationMessage = 'SomeMessage';
 
 
-    public function recheckNotifications(): void
+    public function checkNotificationsAfterSave(): void
     {
         if (!$this->skipNotificationCreation()) {
             $this->createNotification($this->notificationType, $this->notificationMessage);
+        }
+    }
+
+    public function checkNotificationsAfterDelete(): void
+    {
+        if (!$this->skipNotificationCreation()) {
+            //this code is rather stupid and only there to test if the afterDelete implementation is triggered
+            $_ENV['checkNotificationsAfterDelete'] = true;
         }
     }
 

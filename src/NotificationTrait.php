@@ -41,7 +41,16 @@ trait NotificationTrait
         $this->onHook(
             Model::HOOK_AFTER_SAVE,
             function (self $entity) {
-                $entity->getNotificationController()->recheckNotifications();
+                $entity->getNotificationController()->checkNotificationsAfterSave();
+            }
+        );
+
+        //After deleting the entity, offer the possibility to recalculate other notifications that might change after
+        //deleting the entity.
+        $this->onHook(
+            Model::HOOK_AFTER_DELETE,
+            function (self $entity) {
+                $entity->getNotificationController()->checkNotificationsAfterDelete();
             }
         );
 

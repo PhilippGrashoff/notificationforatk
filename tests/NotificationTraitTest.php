@@ -35,12 +35,21 @@ class NotificationTraitTest extends TestCase
 
     public function testAfterSaveHook(): void
     {
-        $model = (new ModelWithNotificationTrait($this->db))->createEntity();
-        $model->save();
+        $entity = (new ModelWithNotificationTrait($this->db))->createEntity();
+        $entity->save();
         self::assertCount(
             1,
-            $model->ref(Notification::class)
+            $entity->ref(Notification::class)
         );
+    }
+
+    public function testAfterDeleteHook(): void
+    {
+        $entity = (new ModelWithNotificationTrait($this->db))->createEntity();
+        $entity->save();
+        self::assertArrayNotHasKey('checkNotificationsAfterDelete', $_ENV);
+        $entity->delete();
+        self::assertArrayHasKey('checkNotificationsAfterDelete', $_ENV);
     }
 
     public function testAddMaxNotificationLevelExpression(): void

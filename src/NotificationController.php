@@ -26,11 +26,27 @@ class NotificationController
     }
 
     /**
-     * implement logic for Notification checks in child classes.
-     * In here, the logic of the notification calculation is stored. This means checking
-     * values, set references or some other logic you want to implement.
+     *  implement logic for Notification checks in child classes.
+     *  In here, the logic of the notification calculation is stored. This means checking
+     *  values, set references or some other logic you want to implement.
+     *
+     * @return void
      */
-    public function recheckNotifications(): void
+    public function checkNotificationsAfterSave(): void
+    {
+        if (!$this->skipNotificationCreation()) {
+            //TODO your code here
+        }
+    }
+
+    /**
+     * All notifications belonging to the model itself are deleted when the parent entity is deleted.
+     * However, it could be that notifications belonging to referenced models might need to be recalculated.
+     * This can be implemented in this method.
+     *
+     * @return void
+     */
+    public function checkNotificationsAfterDelete(): void
     {
         if (!$this->skipNotificationCreation()) {
             //TODO your code here
